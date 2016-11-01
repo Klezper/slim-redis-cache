@@ -1,20 +1,24 @@
 {
-	"name": "abouvier/slim-redis-cache",
+	"name": "digipix/slim-redis-cache",
 	"type": "library",
 	"description": "Redis cache middleware for Slim framework",
 	"keywords": ["slim", "middleware", "cache", "redis"],
-	"homepage": "https://github.com/abouvier/slim-redis-cache",
+	"homepage": "https://github.com/digipixbr/slim-redis-cache",
 	"license": "Apache-2.0",
 	"authors": [
 		{
 			"name": "abouvier",
 			"email": "abouvier@student.42.fr"
+		},
+		{
+			"name": "raulfortes",
+			"email": "raul.fortes@digipix.com.br"
 		}
 	],
 	"require": {
-		"php": ">=5.4.0",
-		"slim/slim": "~2.3",
-		"predis/predis": "~1.0"
+        "php": ">=5.5.0",
+        "slim/slim": "^3.3",
+		"predis/predis": "^v1.1.1"
 	},
 	"autoload": {
 		"psr-4": {
