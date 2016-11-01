@@ -16,11 +16,13 @@
 	limitations under the License.
 */
 
-namespace Slim\Middleware;
+namespace Digipix\Middleware;
 
 use \Predis\ClientInterface;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
-class RedisCache extends \Slim\Middleware
+class RedisCache 
 {
 	protected $client;
 	protected $settings;
@@ -31,8 +33,10 @@ class RedisCache extends \Slim\Middleware
 		$this->settings = $settings;
 	}
 
-	public function call()
-	{
+	public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next)
+    {
+        $response = $next($request, $response);
+
 		$app = $this->app;
 		$env = $app->environment;
 		$key = $env['SCRIPT_NAME'] . $env['PATH_INFO'];
@@ -52,5 +56,8 @@ class RedisCache extends \Slim\Middleware
 			if (array_key_exists('timeout', $this->settings))
 				$this->client->expire($key, $this->settings['timeout']);
 		}
-	}
+
+        return $response;
+    }
+
 }
