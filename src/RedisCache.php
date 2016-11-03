@@ -25,37 +25,58 @@ use Psr\Http\Message\ResponseInterface;
 class RedisCache 
 {
 	protected $client;
-	protected $settings;
+	protected $timeout;
 
-	public function __construct(ClientInterface $client, array $settings = [])
+	public function __construct(ClientInterface $client, $timeout = 0)
 	{
 		$this->client = $client;
-		$this->settings = $settings;
+		$this->timeout = $timeout;
 	}
 
 	public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next)
     {
 
-		$app = $this->app;
-		$env = $app->environment;
-		$key = $env['SCRIPT_NAME'] . $env['PATH_INFO'];
-		if (!empty($env['QUERY_STRING']))
-			$key .= '?' . $env['QUERY_STRING'];
-		$response = $app->response;
+		$route = $request->getAttribute('route');
+	    $name = $route->getName();
+	    $groups = $route->getGroups();
+	    $methods = $route->getMethods();
+	    $arguments = $route->getArguments();
+	    $identifier =  $route->getIdentifier();
+
+	    $uri = $request->getUri();
+		$path = $uri->getPath();
+
+		$key = $name . '_' . implode("_", $methods) . '_' . implode("_",$groups) . '_' . implode("_",$arguments) . '_' . $identifier . '_' . $uri . '_' . $path;
 
 		if ($this->client->exists($key)) {
-			$response->setBody($this->client->get($key));
-	        return $next($request, $response);
+			$cache_value = $this->client->get($key);
+			$value = explode("|",$cache_value);
+			$headers = explode("-#-",$value[0]);
+			foreach ($headers as $item) {
+				$header = explode("-!@!-",$item);
+				$response = $response->withHeader($header[0],$header[1]);
+			}
 
+			$response->getBody()->write($value[1]);
+
+	        return $response;
 		}
 
-		if ($response->getStatus() == 200) {
-			$this->client->set($key, $response->getBody());
-			if (array_key_exists('timeout', $this->settings))
-				$this->client->expire($key, $this->settings['timeout']);
+        $response = $next($request, $response);
+		
+		if ($response->isSuccessful()) {
+			$headers = array();
+			foreach ($response->getHeaders() as $name => $values) {
+				foreach ($values as $value) {
+					array_push($headers, $name .'-!@!-'.$value);
+	            }
+            }
+			$value = array('header' => implode("-#-",$headers), 'body' => $response->getBody());
+			$this->client->set($key, implode("|",$value));
+			$this->client->expire($key, $this->timeout);
 		}
 
-        return $next($request, $response);
+        return $response;
     }
 
 }
