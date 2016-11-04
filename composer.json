@@ -3,7 +3,7 @@
 	"type": "library",
 	"description": "Redis cache middleware for Slim framework",
 	"keywords": ["slim", "middleware", "cache", "redis"],
-	"homepage": "https://github.com/digipixbr/slim-redis-cache",
+	"homepage": "https://github.com/klezper/slim-redis-cache",
 	"license": "Apache-2.0",
 	"authors": [
 		{
