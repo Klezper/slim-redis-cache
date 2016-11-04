@@ -1,5 +1,5 @@
 {
-	"name": "digipix/slim-redis-cache",
+	"name": "klezper/slim-redis-cache",
 	"type": "library",
 	"description": "Redis cache middleware for Slim framework",
 	"keywords": ["slim", "middleware", "cache", "redis"],
